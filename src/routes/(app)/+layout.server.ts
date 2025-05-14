@@ -1,7 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import type { AuthUserProps } from '../../types/user';
 import { PUBLIC_TS_EXPRESS_URL } from '$env/static/public';
-import { goto } from '$app/navigation';
 import { redirect } from '@sveltejs/kit';
 import axios from 'axios';
 export const load: LayoutServerLoad = async ({ cookies }) => {
@@ -23,7 +22,8 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
                 return data.user as AuthUserProps;
             }
 
-        } catch (error: any) {
+        } catch (error) {
+            console.error('Error retrieving user data:', error);
             cookies.delete('token', {
                 expires: new Date(0),
                 path: '/',
