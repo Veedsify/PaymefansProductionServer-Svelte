@@ -32,7 +32,7 @@
 
 <svelte:head>
 	<title>Paymefans</title>
-	<meta name="description" content="A simple SvelteKit application" />
+	<meta name="description" content="The Ultimate Fan Base Platform" />
 	<link rel="icon" href="/favicon.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
@@ -40,8 +40,7 @@
 	richColors={true}
 	position="top-right"
 	toastOptions={{
-		closeButton: true,
-		duration: 10000
+		closeButton: true
 	}}
 />
 <main class="relative grid h-screen lg:grid-cols-8">
