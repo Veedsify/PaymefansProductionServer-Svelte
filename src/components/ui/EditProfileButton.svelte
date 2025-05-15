@@ -1,25 +1,20 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { Facebook, Instagram, LucideCamera, Twitter, X } from '@lucide/svelte';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { Facebook, Instagram, LucideCamera, Twitter, X, YoutubeIcon } from '@lucide/svelte';
+	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { getToken } from '$lib/token';
-	import type { UserUpdateProfileType } from '../../types/user';
+	import type { AuthUserProps, UserUpdateProfileType } from '../../types/user';
 	import ROUTE from '$lib/config/routes';
 	import { PROFILE_CONFIG } from '$lib/config/config';
 	import { countries } from '$lib/locations';
 	import BannerComponent from './BannerComponent.svelte';
 
-	export let user: any;
+	export let user: AuthUserProps;
 
 	let open = false;
 	let file: File | null = null;
-	let userData: UserUpdateProfileType = { ...user };
-
-	$: if (user) {
-		userData = { ...user, email: $user?.email };
-	}
+	let userData: UserUpdateProfileType;
 
 	function handleInputChange(e: Event) {
 		const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -35,6 +30,12 @@
 	}
 
 	async function handleSaveClick() {
+		if (!userData) {
+			toast.error('No Changes Detected', {
+				id: 'profile-update'
+			});
+			return;
+		}
 		const formData = new FormData();
 		for (const key in userData) {
 			if (Object.prototype.hasOwnProperty.call(userData, key)) {
@@ -44,21 +45,25 @@
 		}
 		try {
 			const token = getToken();
-			toast.loading(PROFILE_CONFIG.PROFILE_UPDATING_MSG);
+			toast.loading(PROFILE_CONFIG.PROFILE_UPDATING_MSG, {
+				id: 'profile-update'
+			});
 			fetch(ROUTE.PROFILE_UPDATE, {
 				method: 'POST',
 				headers: { Authorization: `Bearer ${token}` },
 				body: formData
 			}).then(async (res) => {
 				if (!res.ok) throw new Error(await res.text());
-				toast.dismiss();
-				toast.success(PROFILE_CONFIG.PROFILE_UPDATED_SUCCESS_MSG);
+				toast.success(PROFILE_CONFIG.PROFILE_UPDATED_SUCCESS_MSG, {
+					id: 'profile-update'
+				});
 				open = false;
 				invalidateAll();
-				return res;
 			});
 		} catch (error) {
-			toast.error(PROFILE_CONFIG.PROFILE_UPDATED_ERROR_MSG);
+			toast.error(PROFILE_CONFIG.PROFILE_UPDATED_ERROR_MSG, {
+				id: 'profile-update'
+			});
 			console.error(error);
 		}
 	}
@@ -99,7 +104,7 @@
 			</button>
 			<h1 class="mb-6 text-center text-2xl font-bold dark:text-white">Edit Profile</h1>
 			<div class="mb-5 rounded-xl">
-				<BannerComponent profile_banner={$user ? $user?.profile_banner : '/site/banner.png'} />
+				<BannerComponent profile_banner={user ? user?.profile_banner : '/site/banner.png'} />
 			</div>
 			<div class="mb-6 flex flex-col items-center">
 				<label for="imageUpload" class="group relative cursor-pointer">
@@ -107,7 +112,7 @@
 						class="border-primary-dark-pink/40 group-hover:border-primary-dark-pink relative mb-2 inline-block overflow-hidden rounded-full border-4 border-dotted p-1 transition-all dark:border-slate-700"
 					>
 						<img
-							src={file ? URL.createObjectURL(file) : $user?.profile_image || '/site/avatar.png'}
+							src={file ? URL.createObjectURL(file) : user?.profile_image || '/site/avatar.png'}
 							alt=""
 							width="96"
 							height="96"
@@ -128,25 +133,25 @@
 					type="text"
 					on:input={handleInputChange}
 					name="name"
-					value={$user?.name}
+					value={user?.name}
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					placeholder="Name"
 				/>
 				<select
 					name="location"
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-					value={$user?.location}
+					value={user?.location}
 					on:change={handleInputChange}
 				>
 					{#each countries as location}
-						<option value={location.name} selected={$user?.location === location.name}>
+						<option value={location.name} selected={user?.location === location.name}>
 							{location.name}
 						</option>
 					{/each}
 				</select>
 				<input
 					type="email"
-					value={$user?.email}
+					value={user?.email}
 					class="mb-3 w-full cursor-none select-none rounded-lg border border-gray-300 p-3 text-black outline-none read-only:text-gray-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					name="email"
 					readonly
@@ -158,13 +163,13 @@
 					rows="4"
 					on:input={handleInputChange}
 					class="focus:ring-primary-dark-pink w-full resize-none rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-					placeholder="Bio">{$user.bio}</textarea
+					placeholder="Bio">{user.bio}</textarea
 				>
 				<input
 					type="text"
 					on:input={handleInputChange}
 					name="website"
-					value={$user.website}
+					value={user.website}
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					placeholder="Website"
 				/>
@@ -180,7 +185,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="instagram"
-						value={$user.instagram}
+						value={user?.Settings?.instagram_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://instagram.com/@paymefans"
 					/>
@@ -197,7 +202,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="twitter"
-						value={$user.twitter}
+						value={user.Settings?.twitter_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://twitter.com/@paymefans"
 					/>
@@ -214,11 +219,86 @@
 						type="text"
 						on:input={handleInputChange}
 						name="facebook"
-						value={$user.facebook}
+						value={user?.Settings?.facebook_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://facebook.com/@paymefans"
 					/>
 				</div>
+				<!-- TikTok -->
+				<div
+					class="mb-4 grid grid-cols-12 items-center overflow-hidden rounded-lg border border-black/10 bg-gray-50 dark:border-slate-700 dark:bg-slate-800"
+				>
+					<div
+						class="text-primary-dark-pink col-span-2 flex h-full items-center justify-center py-2 dark:text-white"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+							><path
+								fill="currentColor"
+								d="M16.6 5.82s.51.5 0 0A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48"
+							/></svg
+						>
+					</div>
+					<input
+						type="text"
+						on:input={handleInputChange}
+						name="tiktok"
+						value={user?.Settings?.tiktok_url}
+						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
+						placeholder="https://tiktok.com/@paymefans"
+					/>
+				</div>
+				<!-- YouTube -->
+				<div
+					class="mb-4 grid grid-cols-12 items-center overflow-hidden rounded-lg border border-black/10 bg-gray-50 dark:border-slate-700 dark:bg-slate-800"
+				>
+					<div
+						class="text-primary-dark-pink col-span-2 flex h-full items-center justify-center py-2 dark:text-white"
+					>
+						<!-- You can use a YouTube SVG icon here -->
+						<YoutubeIcon />
+					</div>
+					<input
+						type="text"
+						on:input={handleInputChange}
+						name="youtube"
+						value={user?.Settings?.youtube_url}
+						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
+						placeholder="https://youtube.com/@paymefans"
+					/>
+				</div>
+				<!-- Snapchat -->
+				<div
+					class="mb-4 grid grid-cols-12 items-center overflow-hidden rounded-lg border border-black/10 bg-gray-50 dark:border-slate-700 dark:bg-slate-800"
+				>
+					<div
+						class="text-primary-dark-pink col-span-2 flex h-full items-center justify-center py-2 dark:text-white"
+					></div>
+					<input
+						type="text"
+						on:input={handleInputChange}
+						name="snapchat"
+						value={user?.Settings?.snapchat_url}
+						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
+						placeholder="https://snapchat.com/@paymefans"
+					/>
+				</div>
+				<!-- Telegram -->
+				<div
+					class="mb-4 grid grid-cols-12 items-center overflow-hidden rounded-lg border border-black/10 bg-gray-50 dark:border-slate-700 dark:bg-slate-800"
+				>
+					<div
+						class="text-primary-dark-pink col-span-2 flex h-full items-center justify-center py-2 dark:text-white"
+					></div>
+					<input
+						type="text"
+						on:input={handleInputChange}
+						name="telegram"
+						value={user?.Settings?.telegram_url}
+						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
+						placeholder="https://t.me/@paymefans"
+					/>
+				</div>
+				<!-- Discord -->
 				<button
 					type="submit"
 					class="bg-primary-dark-pink focus:ring-primary-dark-pink w-full rounded-lg py-3 font-semibold text-white shadow transition-colors hover:bg-pink-700 focus:outline-none focus:ring-2"

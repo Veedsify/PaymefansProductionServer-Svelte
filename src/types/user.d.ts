@@ -54,6 +54,13 @@ export type AuthUserProps = {
         enable_free_message: boolean;
         two_factor_auth: boolean;
         subscription_price: number;
+        instagram_url: string;
+        twitter_url: string;
+        facebook_url: string;
+        snapchat_url: string;
+        tiktok_url: string;
+        telegram_url: string;
+        youtube_url: string;
     };
     following: number;
     Model?: {

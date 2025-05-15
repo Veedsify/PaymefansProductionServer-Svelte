@@ -23,10 +23,11 @@
 				password
 			});
 			const data = res.data;
-			toast.dismiss();
 			if (!data?.error) {
 				if (data?.token && !data?.tfa) {
-					toast.success(LOGIN_CONFIG.LOGIN_SUCCESSFUL_MSG);
+					toast.success(LOGIN_CONFIG.LOGIN_SUCCESSFUL_MSG, {
+						id: 'login-success'
+					});
 					document.cookie = `token=${data.token}`;
 					const urlParams = new URLSearchParams(window.location.search);
 					const redirect = urlParams.get('redirect');
@@ -39,33 +40,37 @@
 					goto('/verify');
 				}
 			} else {
-				toast.error(data?.message);
+				toast.error(data?.message, {
+					id: 'login-error'
+				});
 			}
 		} catch (error: any) {
 			console.error('Error while logging in:', error);
-			toast.error(error.response?.data.message || 'An error occurred while logging in');
+			toast.error(error.response?.data.message || 'An error occurred while logging in', {
+				id: 'login-error'
+			});
 		}
 	}
 </script>
 
-<div class="min-h-dvh bg-black p-5 lg:p-0">
+<div class="max-h-dvh bg-black p-5 lg:p-0">
 	<div class="mx-auto grid-cols-2 items-start justify-center lg:grid">
-		<div class="relative hidden min-h-dvh lg:block">
+		<div class="relative hidden h-dvh overflow-hidden lg:block">
 			<img
 				width="720"
 				height="720"
 				src="/images/auth_image.jpeg"
 				alt="Login Bear"
-				class="absolute inset-0 h-full w-full object-cover"
+				class="absolute inset-0 w-full object-cover object-center"
 				loading="eager"
 			/>
 			<div
 				style="position: absolute; inset: 0; background: linear-gradient(to right, transparent 70%, rgba(0,0,0,0.9) 100%); pointer-events: none;"
 			></div>
 		</div>
-		<div class="h-full lg:p-14 2xl:p-28">
+		<div class="h-dhv lg:p-14 2xl:p-28">
 			<div class="mx-auto mb-24 max-w-screen-xl pt-12 md:mt-16">
-				<a href="/client/public">
+				<a href="/">
 					<img
 						width="150"
 						height="150"
