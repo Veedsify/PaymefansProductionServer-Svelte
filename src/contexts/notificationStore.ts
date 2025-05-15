@@ -1,10 +1,6 @@
 // src/lib/stores/notificationStore.ts
 import { writable } from 'svelte/store';
-
-export interface Notification {
-    notification_id: string;
-    read: boolean;
-}
+import type { Notification } from '../types/notification';
 
 interface NotificationStore {
     notifications: Notification[];

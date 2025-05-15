@@ -174,8 +174,9 @@
 			const data: { status: boolean } = await response.json();
 			if (data.status) {
 				toast.success('Banner image uploaded successfully', {
-					id: 'banner-update'
-				});
+					id: 'banner-update',
+					
+				})
 				file = null;
 				if (imageUrl) URL.revokeObjectURL(imageUrl);
 				imageUrl = null;

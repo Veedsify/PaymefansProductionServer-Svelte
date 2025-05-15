@@ -14,13 +14,24 @@
 	import PointsCount from './PointsCount.svelte';
 	import { sidebarOpen } from '../../contexts/sidebarStrore';
 	import NotificationSidebar from './NotificationSidebar.svelte';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import type { AuthUserProps } from '../../types/user.d';
 	const unreadCount = 23;
-	import type { Writable } from 'svelte/store';
+	import { writable, type Writable } from 'svelte/store';
 	const user = getContext<Writable<AuthUserProps | null>>('user');
-	$: isModel = $user?.is_model ?? false;
-	$: isVerified = $user?.is_model && $user?.Model?.verification_status;
+	const status = writable({
+		isModel: false,
+		isVerified: false
+	});
+
+	onMount(() => {
+		if ($user && $user.Model) {
+			status.set({
+				isModel: $user?.is_model!,
+				isVerified: $user?.is_model && !$user.Model.verification_status
+			});
+		}
+	});
 </script>
 
 <div
@@ -114,7 +125,7 @@
 				<p>Store</p>
 			</a>
 
-			{#if isModel}
+			{#if $user && $status.isModel}
 				<a
 					href="/groups"
 					class="mb-2 flex items-center gap-5 rounded-xl p-2 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-900"
@@ -124,7 +135,7 @@
 				</a>
 			{/if}
 			<NotificationSidebar />
-			{#if isVerified}
+			{#if $status.isVerified}
 				<a
 					href="/verification"
 					class="mb-2 flex items-center gap-5 rounded-xl p-2 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-900"
@@ -133,7 +144,7 @@
 					<p>Verification</p>
 				</a>
 			{/if}
-			{#if isModel}
+			{#if $user && !$status.isModel}
 				<a
 					href="/models/benefits"
 					class="mb-2 flex items-center gap-5 rounded-xl p-2 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-900"
