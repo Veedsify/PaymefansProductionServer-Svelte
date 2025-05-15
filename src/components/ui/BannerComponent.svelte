@@ -144,7 +144,9 @@
 		if (!file || !imageRef || !cropArea) return;
 
 		try {
-			toast.loading('Uploading banner image...');
+			toast.loading('Uploading banner image...', {
+				id: 'banner-update'
+			});
 			const croppedImageBlob: Blob | null = await getCroppedImg(imageRef, cropArea);
 			if (!croppedImageBlob) {
 				toast.error('Failed to crop image');
@@ -163,15 +165,17 @@
 			});
 
 			if (!response.ok) {
-				toast.dismiss();
-				toast.error('Failed to upload banner image');
+				toast.error('Failed to upload banner image', {
+					id: 'banner-update'
+				});
 				return;
 			}
 
 			const data: { status: boolean } = await response.json();
 			if (data.status) {
-				toast.dismiss();
-				toast.success('Banner image uploaded successfully');
+				toast.success('Banner image uploaded successfully', {
+					id: 'banner-update'
+				});
 				file = null;
 				if (imageUrl) URL.revokeObjectURL(imageUrl);
 				imageUrl = null;
@@ -180,7 +184,9 @@
 			}
 		} catch (error) {
 			console.error(error);
-			toast.error('Failed to upload banner image');
+			toast.error('Failed to upload banner image', {
+				id: 'banner-update'
+			});
 		}
 	};
 

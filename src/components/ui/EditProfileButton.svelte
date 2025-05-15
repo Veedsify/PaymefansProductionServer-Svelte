@@ -9,8 +9,9 @@
 	import { PROFILE_CONFIG } from '$lib/config/config';
 	import { countries } from '$lib/locations';
 	import BannerComponent from './BannerComponent.svelte';
+	import type { Writable } from 'svelte/store';
 
-	export let user: AuthUserProps;
+	export let user: Writable<AuthUserProps | null> | null = null;
 
 	let open = false;
 	let file: File | null = null;
@@ -104,7 +105,7 @@
 			</button>
 			<h1 class="mb-6 text-center text-2xl font-bold dark:text-white">Edit Profile</h1>
 			<div class="mb-5 rounded-xl">
-				<BannerComponent profile_banner={user ? user?.profile_banner : '/site/banner.png'} />
+				<BannerComponent profile_banner={$user ? $user?.profile_banner : '/site/banner.png'} />
 			</div>
 			<div class="mb-6 flex flex-col items-center">
 				<label for="imageUpload" class="group relative cursor-pointer">
@@ -112,7 +113,7 @@
 						class="border-primary-dark-pink/40 group-hover:border-primary-dark-pink relative mb-2 inline-block overflow-hidden rounded-full border-4 border-dotted p-1 transition-all dark:border-slate-700"
 					>
 						<img
-							src={file ? URL.createObjectURL(file) : user?.profile_image || '/site/avatar.png'}
+							src={file ? URL.createObjectURL(file) : $user?.profile_image || '/site/avatar.png'}
 							alt=""
 							width="96"
 							height="96"
@@ -133,25 +134,25 @@
 					type="text"
 					on:input={handleInputChange}
 					name="name"
-					value={user?.name}
+					value={$user?.name}
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					placeholder="Name"
 				/>
 				<select
 					name="location"
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-					value={user?.location}
+					value={$user?.location}
 					on:change={handleInputChange}
 				>
 					{#each countries as location}
-						<option value={location.name} selected={user?.location === location.name}>
+						<option value={location.name} selected={$user?.location === location.name}>
 							{location.name}
 						</option>
 					{/each}
 				</select>
 				<input
 					type="email"
-					value={user?.email}
+					value={$user?.email}
 					class="mb-3 w-full cursor-none select-none rounded-lg border border-gray-300 p-3 text-black outline-none read-only:text-gray-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					name="email"
 					readonly
@@ -163,13 +164,13 @@
 					rows="4"
 					on:input={handleInputChange}
 					class="focus:ring-primary-dark-pink w-full resize-none rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-					placeholder="Bio">{user.bio}</textarea
+					placeholder="Bio">{$user?.bio}</textarea
 				>
 				<input
 					type="text"
 					on:input={handleInputChange}
 					name="website"
-					value={user.website}
+					value={$user?.website}
 					class="focus:ring-primary-dark-pink w-full rounded-lg border border-gray-300 p-3 text-black outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
 					placeholder="Website"
 				/>
@@ -185,7 +186,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="instagram"
-						value={user?.Settings?.instagram_url}
+						value={$user?.Settings?.instagram_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://instagram.com/@paymefans"
 					/>
@@ -202,7 +203,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="twitter"
-						value={user.Settings?.twitter_url}
+						value={$user?.Settings?.twitter_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://twitter.com/@paymefans"
 					/>
@@ -219,7 +220,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="facebook"
-						value={user?.Settings?.facebook_url}
+						value={$user?.Settings?.facebook_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://facebook.com/@paymefans"
 					/>
@@ -242,7 +243,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="tiktok"
-						value={user?.Settings?.tiktok_url}
+						value={$user?.Settings?.tiktok_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://tiktok.com/@paymefans"
 					/>
@@ -261,7 +262,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="youtube"
-						value={user?.Settings?.youtube_url}
+						value={$user?.Settings?.youtube_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://youtube.com/@paymefans"
 					/>
@@ -277,7 +278,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="snapchat"
-						value={user?.Settings?.snapchat_url}
+						value={$user?.Settings?.snapchat_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://snapchat.com/@paymefans"
 					/>
@@ -293,7 +294,7 @@
 						type="text"
 						on:input={handleInputChange}
 						name="telegram"
-						value={user?.Settings?.telegram_url}
+						value={$user?.Settings?.telegram_url}
 						class="col-span-10 border-none bg-transparent p-2 text-black outline-none dark:text-white"
 						placeholder="https://t.me/@paymefans"
 					/>
