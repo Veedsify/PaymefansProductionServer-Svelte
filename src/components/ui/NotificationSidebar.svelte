@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Heart, LucideBell, UserPlus } from '@lucide/svelte';
-	import type { NotificationType } from '../../types/notification';
-	import { notificationStore } from '../../contexts/notificationStore';
-	const totalNotifications = $notificationStore.totalNotifications;
+	import notificationStore from '../../contexts/notificationStore';
+	let totalNotifications = $notificationStore.totalNotifications;
 </script>
 
 <span>
@@ -15,7 +14,7 @@
 		<span
 			class="bg-primary-text-dark-pink ml-auto flex h-8 w-8 items-center justify-center rounded-full p-0 font-bold text-white"
 		>
-			{totalNotifications ? totalNotifications : 0}
+			{totalNotifications}
 		</span>
 	</a>
 </span>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Notifications from '../../../components/misc/Notifications.svelte';
-	import { notificationStore } from '../../../contexts/notificationStore';
-	const totalNotifications = $notificationStore.totalNotifications;
+	import notificationStore from '../../../contexts/notificationStore';
+	let totalNotifications = $notificationStore.totalNotifications;
 </script>
 
 <div>

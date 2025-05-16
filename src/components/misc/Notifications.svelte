@@ -3,9 +3,10 @@
 	import { PUBLIC_TS_EXPRESS_URL } from '$env/static/public';
 	import { NotificationIcontypes } from '../../utils/data/static/notification-types';
 	import { getToken } from '$lib/token';
-	import { notificationStore } from '../../contexts/notificationStore';
 	import { LucideLoader } from '@lucide/svelte';
-	const { addAllNotifications, updateNotification } = notificationStore;
+	import type { Notification } from '../../types/notification';
+	import notificationStore from '../../contexts/notificationStore';
+	import _ from 'lodash';
 	let page = 1;
 	let hasMore = false;
 	let loading = false;
@@ -42,15 +43,25 @@
 			});
 
 			if (response.ok) {
-				const { data, hasMore: moreData } = await response.json();
-				addAllNotifications(data);
-				hasMore = moreData;
+				const result = await response.json();
+				const notifications: Notification[] = result.data || [];
+				const totalNotifications = notifications.filter((n) => !n.read).length;
+				hasMore = !!result.hasMore;
 				error = false;
+				if (notifications.length > 0) {
+					notificationStore.update((store) => ({
+						...store,
+						notifications: _.uniqBy([...store.notifications, ...notifications], 'id'),
+						hasMore: hasMore,
+						totalNotifications: totalNotifications
+					}));
+				}
 			} else {
 				error = true;
 			}
 		} catch (err) {
 			error = true;
+			console.error('Error fetching notifications:', err);
 		} finally {
 			loading = false;
 		}
@@ -61,6 +72,31 @@
 			loading = true;
 			page += 1;
 			fetchNotifications();
+		}
+	}
+
+	// Update notification read status
+	async function updateNotification(notification_id: string) {
+		const token = getToken();
+		try {
+			const url = `${PUBLIC_TS_EXPRESS_URL}/notifications/read/${notification_id}`;
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			if (response.ok) {
+				notificationStore.update((state) => {
+					const updatedNotifications = state.notifications.map((notification) => {
+						if (notification.notification_id === notification_id) {
+							return { ...notification, read: true };
+						}
+						return notification;
+					});
+					return { ...state, notifications: updatedNotifications };
+				});
+			}
+		} catch (err) {
+			console.error('Error updating notification:', err);
 		}
 	}
 
@@ -79,7 +115,7 @@
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			if (res.ok) {
-				updateNotification(notification_id);
+				await updateNotification(notification_id);
 				window.location.href = url;
 			}
 		}

@@ -15,6 +15,7 @@
 	import { writable, type Writable } from 'svelte/store'; // Import writable
 	import type { AuthUserProps } from '../../types/user.d';
 	import type { LayoutProps } from '../$types';
+	import type { Notification } from '../../types/notification';
 	interface LayoutData extends LayoutProps {
 		data: {
 			user: AuthUserProps | null;
